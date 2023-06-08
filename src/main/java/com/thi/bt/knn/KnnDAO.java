@@ -22,7 +22,7 @@ public class KnnDAO {
 		private DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
 		private String jdbcURL = "jdbc:mysql://localhost:3306/kpdl";
 		private String jdbcUsername = "root";
-		private String jdbcPassword = "duyenduyen3912";
+		private String jdbcPassword = "tothichmeou39";
 		
 		
 		private static final String INSERT_Patient_SQL = "insert into patient (name,age,gender,polyuria,polydipsia,wLoss,weakness,polyphagia,genital,visualBlurring,itching,irritability,delayedHealing,partial,muscleStiffness,alopecia,obesity,class, date) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";

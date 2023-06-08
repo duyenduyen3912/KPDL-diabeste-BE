@@ -49,7 +49,7 @@ public class Knn extends KnowledgeModel {
         int folds = 10;
         eval = new Evaluation(this.trainSet);
         eval.crossValidateModel(knn, this.testSet, folds, rd);
-        System.out.println(eval.toSummaryString("\n -----Ket qua danh gia mo hinh nhan dien 4 loai hoa-----\n", false));
+        System.out.println(eval.toSummaryString("\n -----Ket qua danh gia mo hinh du doan benh tieu duong-----\n", false));
     }
 
     public String predictClassLabel(Instances data) throws Exception {
