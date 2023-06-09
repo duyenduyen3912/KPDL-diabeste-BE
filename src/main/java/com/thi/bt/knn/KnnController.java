@@ -48,7 +48,7 @@ public class KnnController {
 	 }
 	 
 	 
-	 @GetMapping("/KnnName/{name}")
+	 @GetMapping("/GetPatient/{name}")
 	 public List<Patient> getPatientSearch(Model model,@PathVariable String name) throws IOException{
 		 
 		List<Patient> Patient = KnnDAO.selectAllPatientByName(name);

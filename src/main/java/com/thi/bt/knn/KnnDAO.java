@@ -165,11 +165,11 @@ public class KnnDAO {
 				data.add(instance);
 				System.out.println(data);
 				
-				Knn model = new Knn("E:\\K2N4\\KPDL\\final\\data\\diabetes_train.arff",
+				Knn model = new Knn("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_train.arff",
 		                "-K 3 -W 0 -A \"weka.core.neighboursearch.LinearNNSearch -A \\\"weka.core.EuclideanDistance -R first-last\\\"\"",
 		                null);
-		        model.buildKNN("E:\\K2N4\\KPDL\\final\\data\\diabetes_train.arff");
-		        model.evaluateKNN("E:\\K2N4\\KPDL\\final\\data\\diabetes_test.arff");
+		        model.buildKNN("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_train.arff");
+		        model.evaluateKNN("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_test.arff");
 		        resultPredict = model.predictClassLabel(data);
 		        System.out.println(resultPredict);
 				
