@@ -7,6 +7,8 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
+import com.thi.bt.knn.request.SearchModal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +36,13 @@ import org.apache.commons.io.IOUtils;
 //@Controller
 @RestController
 @CrossOrigin
-
 public class KnnController {
-	
-	private KnnDAO KnnDAO = new KnnDAO();
+
+	@Autowired
+	private KnnDAO KnnDAO ;
 	
 	 @GetMapping("/GetPatient")
-	 public List<Patient> getPatients(Model model) throws IOException
+	 public List<Patient> getPatients() throws IOException
 	 {
 		 List<Patient> Patient = KnnDAO.selectAllPatients();
 	
@@ -53,6 +55,14 @@ public class KnnController {
 		 
 		List<Patient> Patient = KnnDAO.selectAllPatientByName(name);
 		 
+		return Patient;
+	}
+
+	@PostMapping("/GetPatient")
+	public List<Patient> search(@RequestBody SearchModal searchModal) throws IOException{
+
+		List<Patient> Patient = KnnDAO.search(searchModal);
+
 		return Patient;
 	}
 	 
