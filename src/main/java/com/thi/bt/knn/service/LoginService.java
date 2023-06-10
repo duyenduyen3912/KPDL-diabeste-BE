@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+//@Transactional(rollbackFor = Exception.class)
 public class LoginService  {
     @Autowired
     private TokenHelper tokenHelper;
@@ -39,7 +39,7 @@ public class LoginService  {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired private AuthenticationManager authenticationManager;
-    public User loginJWT(LoginRequest loginRequest)  {
+    public ResponseData<User> loginJWT(LoginRequest loginRequest) throws BadRequestException {
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -49,11 +49,20 @@ public class LoginService  {
             User user = (User) authentication.getPrincipal();
             String jwt = tokenHelper.generateToken(loginRequest.getUsername(), user, session);
             user.setJwt(jwt);
-            return user;
+            return new ResponseData<>(user, Result.SUCCESS);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        } catch (BadCredentialsException e) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (AccessDeniedException ex1) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (LockedException ex) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (DisabledException exx) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (AuthenticationException atx) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException ex) {
+            return new ResponseData<>(Result.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu không đúng");
         }
     }
 

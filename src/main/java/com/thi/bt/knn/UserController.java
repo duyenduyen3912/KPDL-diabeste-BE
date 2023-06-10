@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     private LoginService loginService;
     @PostMapping(value = "/public/login")
-    public ResponseEntity<?> loginJWT(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<ResponseData<User>> loginJWT(@RequestBody LoginRequest loginRequest, HttpServletRequest request) throws BadRequestException {
         System.out.println(request.getHeader("Accept-Language"));
 
         return new ResponseEntity<>(loginService.loginJWT(loginRequest), HttpStatus.OK);
