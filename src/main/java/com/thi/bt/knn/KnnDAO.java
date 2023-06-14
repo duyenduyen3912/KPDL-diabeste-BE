@@ -26,74 +26,19 @@ import weka.core.Instances;
 
 @Service
 public class KnnDAO {
-    //		private DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-//		private String jdbcURL = "jdbc:mysql://localhost:3306/kpdl";
-//		private String jdbcUsername = "root";
-//		private String jdbcPassword = "duyenduyen3912";
     @Autowired
     private PatientService patientService;
 
-//		private static final String INSERT_Patient_SQL = "insert into patient (name,age,gender,polyuria,polydipsia,wLoss,weakness,polyphagia,genital,visualBlurring,itching,irritability,delayedHealing,partial,muscleStiffness,alopecia,obesity,class, date) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-//		private static final String SELECT_Patient_BY_NAME ="select * from patient where name=?";
-//		private static final String SEARCH_Patient_BY_NAME ="select * from patient where name like ?";
-//		private static final String SELECT_ALL_Patient ="select * from Patient ";
-
-
-//		protected Connection getConnection() {
-//			Connection connection = null;
-//			try {
-//				Class.forName("com.mysql.cj.jdbc.Driver");
-//				connection = DriverManager.getConnection(jdbcURL,jdbcUsername,jdbcPassword);
-//			}catch (SQLException e) {
-//				e.printStackTrace();
-//			}catch(ClassNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//			return connection;
-//		}
 
     public List<Patient> selectAllPatients() {
         List<Patient> Patients = patientService.getAllPatients();
-//			try(Connection connection = getConnection()) {
-//				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_Patient);
-//				ResultSet resultSet = preparedStatement.executeQuery();
-//				while(resultSet.next())
-//				{
-//					int idPatient = resultSet.getInt("idPatient");
-//
-//					String name = resultSet.getString("name");
-//					int age = resultSet.getInt("age");
-//					String gender = resultSet.getString("gender");
-//					String polyuria = resultSet.getString("polyuria");
-//					String polydipsia = resultSet.getString("polydipsia");
-//					String wLoss = resultSet.getString("wLoss");
-//					String weakness = resultSet.getString("weakness");
-//					String polyphagia = resultSet.getString("polyphagia");
-//					String genital = resultSet.getString("genital");
-//					String visualBlurring = resultSet.getString("visualBlurring");
-//					String itching = resultSet.getString("itching");
-//					String irritability = resultSet.getString("irritability");
-//					String delayedHealing = resultSet.getString("delayedHealing");
-//					String partial = resultSet.getString("partial");
-//					String muscleStiffness = resultSet.getString("muscleStiffness");
-//					String alopecia = resultSet.getString("alopecia");
-//					String obesity = resultSet.getString("obesity");
-//					String classDT = resultSet.getString("class");
-//					Date date = resultSet.getDate("date");
-//					String date2 = date.toString();
-//
-//					Patient b = new Patient(gender,polyuria,polydipsia,wLoss,weakness,polyphagia,genital,visualBlurring,itching,irritability,delayedHealing,partial,muscleStiffness,alopecia,obesity,idPatient,age, date2, name, classDT);
-//					Patients.add(b);
-//				}
-//			} catch(Exception e) {
-//				e.printStackTrace();
-//			}
         return Patients;
     }
 
 
     public String insertPatient(Patient Patient) {
         String resultPredict = null;
+        String kNearest = null;
         try {
             // Tạo các đặc trưng cho file ARFF
 
@@ -164,13 +109,8 @@ public class KnnDAO {
 
 
             data.add(instance);
-            System.out.println(data);
+           // System.out.println(data);
 
-//            Knn model = new Knn("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_train.arff",
-//                    "-K 3 -W 0 -A \"weka.core.neighboursearch.LinearNNSearch -A \\\"weka.core.EuclideanDistance -R first-last\\\"\"",
-//                    null);
-//            model.buildKNN("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_train.arff");
-//            model.evaluateKNN("C:\\Users\\ngocl\\eclipse-workspace\\bai-thi2\\src\\data\\diabetes_test.arff");
 
             //load file from resource
             ClassLoader classLoader = getClass().getClassLoader();
@@ -182,34 +122,9 @@ public class KnnDAO {
 
             resultPredict = model.predictClassLabel(data);
             System.out.println(resultPredict);
-
-
-//				PreparedStatement ps = connection.prepareStatement(INSERT_Patient_SQL);
-//				int result = 0;
-//
-//				ps.setString(1, Patient.getName());
-//				ps.setInt(2, Patient.getAge());
-//				ps.setString(3, Patient.getGender());
-//				ps.setString(4, Patient.getPolyuria());
-//				ps.setString(5, Patient.getPolydipsia());
-//				ps.setString(6, Patient.getwLoss());
-//				ps.setString(7, Patient.getWeakness());
-//				ps.setString(8, Patient.getPolyphagia());
-//				ps.setString(9, Patient.getGenital());
-//				ps.setString(10, Patient.getVisualBlurring());
-//				ps.setString(11, Patient.getItching());
-//				ps.setString(12, Patient.getIrritability());
-//				ps.setString(13, Patient.getDelayedHealing());
-//				ps.setString(14, Patient.getPartial());
-//				ps.setString(15, Patient.getMuscleStiffness());
-//				ps.setString(16, Patient.getAlopecia());
-//				ps.setString(17, Patient.getObesity());
-//				ps.setString(18, resultPredict);
-//				Date date = new Date(System.currentTimeMillis());
-//				ps.setDate(19, new java.sql.Date(date.getTime()));
-//				result = ps.executeUpdate();
             User userLogin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Patient.setClassDT(resultPredict);
+            
             Patient.setDate(new Date());
             Patient.setRequestBy(userLogin.getId());
             patientService.savePatient(Patient);
@@ -222,43 +137,7 @@ public class KnnDAO {
     }
 
     public List<Patient> selectAllPatientByName(String search) {
-//			List<Patient> Patients = new ArrayList<>();
-//			try(Connection connection = getConnection()) {
-//				PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_Patient_BY_NAME);
-//				preparedStatement.setString(1,'%' +search+ '%');
-//				ResultSet resultSet = preparedStatement.executeQuery();
-//				while(resultSet.next())
-//				{
-//					int idPatient = resultSet.getInt("idPatient");
-//
-//					String name = resultSet.getString("name");
-//					int age = resultSet.getInt("age");
-//					String gender = resultSet.getString("gender");
-//					String polyuria = resultSet.getString("polyuria");
-//					String polydipsia = resultSet.getString("polydipsia");
-//					String wLoss = resultSet.getString("wLoss");
-//					String weakness = resultSet.getString("weakness");
-//					String polyphagia = resultSet.getString("polyphagia");
-//					String genital = resultSet.getString("genital");
-//					String visualBlurring = resultSet.getString("visualBlurring");
-//					String itching = resultSet.getString("itching");
-//					String irritability = resultSet.getString("irritability");
-//					String delayedHealing = resultSet.getString("delayedHealing");
-//					String partial = resultSet.getString("partial");
-//					String muscleStiffness = resultSet.getString("muscleStiffness");
-//					String alopecia = resultSet.getString("alopecia");
-//					String obesity = resultSet.getString("obesity");
-//					String classDT = resultSet.getString("class");
-//					Date date = resultSet.getDate("date");
-//					String date2 = date.toString();
-//
-//					Patient b = new Patient(gender,polyuria,polydipsia,wLoss,weakness,polyphagia,genital,visualBlurring,itching,irritability,delayedHealing,partial,muscleStiffness,alopecia,obesity,idPatient,age, date2, name, classDT);
-//					Patients.add(b);
-//				}
-//			} catch(Exception e) {
-//				e.printStackTrace();
-//			}
-//			return Patients;
+
         return null;
     }
 

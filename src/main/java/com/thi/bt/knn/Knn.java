@@ -4,7 +4,11 @@
  * and open the template in the editor.
  */
 package com.thi.bt.knn;
-
+import weka.classifiers.Classifier;
+import weka.classifiers.evaluation.output.prediction.PlainText;
+import weka.classifiers.lazy.IBk;
+import weka.core.Instance;
+import weka.core.Instances;
 /**
  *
  * @author ngocl
@@ -14,10 +18,12 @@ import weka.classifiers.lazy.IBk;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.neighboursearch.LinearNNSearch;
 
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Knn extends KnowledgeModel {
@@ -40,7 +46,7 @@ public class Knn extends KnowledgeModel {
         knn.buildClassifier(this.trainSet); 
     }
 
-    public void evaluateKNN(String fileName) throws Exception {
+    public String evaluateKNN(String fileName) throws Exception {
         setTestSet(fileName); 
         this.testSet.setClassIndex(this.testSet.numAttributes()-1);
 
@@ -49,28 +55,33 @@ public class Knn extends KnowledgeModel {
         int folds = 10;
         eval = new Evaluation(this.trainSet);
         eval.crossValidateModel(knn, this.testSet, folds, rd);
+        double correctlyClassifiedInstances = eval.pctCorrect();
+        String resultEval = String.valueOf(correctlyClassifiedInstances);
+        System.out.print("++++++" + resultEval);
         System.out.println(eval.toSummaryString("\n -----Ket qua danh gia mo hinh du doan benh tieu duong-----\n", false));
+        return resultEval;
     }
-
+//trả về kết quả
     public String predictClassLabel(Instances data) throws Exception {
-      
+        
         DataSource source = new DataSource(data);
         Instances unLabel = source.getDataSet();
         unLabel.setClassIndex(unLabel.numAttributes() - 1);
-
+       
+        // predict
+        double predict = knn.classifyInstance(unLabel.instance(0));
+        unLabel.instance(0).setClassValue(predict);
+        unLabel.setClassIndex(unLabel.numAttributes() - 1);
       
-//        for (int i = 0; i < unLabel.numInstances() ; i++) {
-            double predict = knn.classifyInstance(unLabel.instance(0));
-            unLabel.instance(0).setClassValue(predict);
-            
-            return unLabel.instance(0).stringValue(unLabel.classIndex());
-//        }
+	    // Calculate probability distribution for predicted class
+	    double[] distribution = knn.distributionForInstance(unLabel.instance(0));
+	    double predictedClassProb = distribution[(int) predict];
 
-     
-        
-        
-         
-        
-    
+         // Print predicted class and probability as a percentage
+        System.out.println("Probability: " + predictedClassProb * 100 + "%");
+        System.out.println(unLabel.instance(0).stringValue(unLabel.classIndex()));
+        return unLabel.instance(0).stringValue(unLabel.classIndex());
     }
+
 }
+
