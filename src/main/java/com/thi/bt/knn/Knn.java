@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package com.thi.bt.knn;
+import com.thi.bt.knn.response.PredictResponde;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.output.prediction.PlainText;
 import weka.classifiers.lazy.IBk;
@@ -62,7 +63,7 @@ public class Knn extends KnowledgeModel {
         return resultEval;
     }
 //trả về kết quả
-    public String predictClassLabel(Instances data) throws Exception {
+    public PredictResponde predictClassLabel(Instances data) throws Exception {
         
         DataSource source = new DataSource(data);
         Instances unLabel = source.getDataSet();
@@ -80,7 +81,9 @@ public class Knn extends KnowledgeModel {
          // Print predicted class and probability as a percentage
         System.out.println("Probability: " + predictedClassProb * 100 + "%");
         System.out.println(unLabel.instance(0).stringValue(unLabel.classIndex()));
-        return unLabel.instance(0).stringValue(unLabel.classIndex());
+
+//        return unLabel.instance(0).stringValue(unLabel.classIndex());
+        return new PredictResponde(unLabel.instance(0).stringValue(unLabel.classIndex()), predictedClassProb * 100);
     }
 
 }

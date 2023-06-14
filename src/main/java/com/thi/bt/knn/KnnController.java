@@ -8,8 +8,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import com.thi.bt.knn.request.SearchModal;
+import com.thi.bt.knn.response.PredictResponde;
+import com.thi.bt.knn.response.ResponseData;
+import com.thi.bt.knn.response.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -70,17 +74,11 @@ public class KnnController {
 	 @RequestMapping(value = "/predict", method = RequestMethod.POST,
              produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Response predict(Response res, @RequestBody Patient patient) throws IOException
-	{				
-			String mess = KnnDAO.insertPatient(patient);
-			if(mess.equals("error")) {
-				res.setResponse("error");
-				
-			}
-			else {
-				res.setResponse(mess);
-			}
-			return res;
+	public ResponseEntity<ResponseData<List<PredictResponde>>> predict(Response res, @RequestBody Patient patient) throws IOException
+	{
+		List<PredictResponde> mess = KnnDAO.insertPatient(patient);
+
+		return new ResponseEntity<>(new ResponseData<List<PredictResponde>>(mess, Result.SUCCESS), HttpStatus.OK);
 	}
 	
 	

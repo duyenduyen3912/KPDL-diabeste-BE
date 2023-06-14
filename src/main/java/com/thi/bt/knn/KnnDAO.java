@@ -1,5 +1,6 @@
 package com.thi.bt.knn;
 
+import java.net.http.HttpClient;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,15 +8,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
+import com.google.gson.Gson;
 import com.thi.bt.knn.request.SearchModal;
+import com.thi.bt.knn.response.PredictResponde;
+import com.thi.bt.knn.service.APIService;
 import com.thi.bt.knn.service.PatientService;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,9 @@ import weka.core.Instances;
 public class KnnDAO {
     @Autowired
     private PatientService patientService;
+    @Autowired
+    private APIService apiService;
+    private Gson gson = new Gson();
 
 
     public List<Patient> selectAllPatients() {
@@ -36,8 +42,9 @@ public class KnnDAO {
     }
 
 
-    public String insertPatient(Patient Patient) {
-        String resultPredict = null;
+    public List<PredictResponde>  insertPatient(Patient Patient) {
+        List<PredictResponde> predictRespondes = new ArrayList<>();
+        PredictResponde predictResponde = new PredictResponde();
         String kNearest = null;
         try {
             // Tạo các đặc trưng cho file ARFF
@@ -120,20 +127,54 @@ public class KnnDAO {
             model.buildKNN(classLoader.getResource("data/diabetes_train.arff").getFile());
             model.evaluateKNN(classLoader.getResource("data/diabetes_test.arff").getFile());
 
-            resultPredict = model.predictClassLabel(data);
-            System.out.println(resultPredict);
+            predictResponde = model.predictClassLabel(data);
+            System.out.println(predictResponde);
             User userLogin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Patient.setClassDT(resultPredict);
-            
+
             Patient.setDate(new Date());
             Patient.setRequestBy(userLogin.getId());
-            patientService.savePatient(Patient);
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return resultPredict;
+        predictResponde.setPhuongphap("KNN");
+        predictRespondes.add(predictResponde);
+
+        //Random Forest algorithm
+        //call api to https://kpdl.vjet.software/predict ( POST method)
+
+        //convert input to number
+        List<Long> dataRF = new ArrayList<>();
+        dataRF.add(Long.valueOf(Patient.getAge()));
+        dataRF.add(Patient.getGender().equals("Male") ? 0L : 1L);
+        dataRF.add(Patient.getPolyuria().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getPolydipsia().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getwLoss().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getWeakness().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getPolyphagia().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getGenital().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getVisualBlurring().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getItching().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getIrritability().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getDelayedHealing().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getPartial().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getMuscleStiffness().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getAlopecia().equals("Yes") ? 1L : 0L);
+        dataRF.add(Patient.getObesity().equals("Yes") ? 1L : 0L);
+
+        PredictResponde predictRespondeRFA = new PredictResponde();
+        String resultRFA = apiService.callApi(dataRF);
+        if (resultRFA != null && !resultRFA.isEmpty()) {
+            predictRespondeRFA = gson.fromJson(resultRFA, PredictResponde.class);
+           predictRespondes.add(predictRespondeRFA);
+        }
+
+        String buildResult = "KNN: " + predictResponde.getPrediction() + " - RF: " + predictRespondeRFA.getPrediction();
+        Patient.setClassDT(buildResult);
+        patientService.savePatient(Patient);
+
+        return predictRespondes;
     }
 
     public List<Patient> selectAllPatientByName(String search) {
